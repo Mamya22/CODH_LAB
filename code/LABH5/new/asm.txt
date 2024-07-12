@@ -1,0 +1,108 @@
+lu12i.w $r2, 0xbfaff       //r2 = 0xbfaff000
+lu12i.w $r1, 0x12345
+addi.w  $r1, $r1, 0x678     // r1 = 0x12345678
+lu12i.w $r3, 0x60000
+addi.w  $r3, $r3, 0x200     //bit 31 30 10 = 1
+lu12i.w $r4, 0x1c008        // data address r4 = 0x1c008000
+// read N
+READ:
+ld.w    $r6, $r2, 0x60     //r6 = sw
+andi    $r7, $r6, 0x80     //r7 = sw8
+beq     $r7, $r0, READ     //read
+andi    $r6, $r6, 0xf      // r6 = N
+addi.w  $r7, $r0, 1         
+sll.w   $r7, $r7, $r6      // r7 = 2^N
+
+ADDR:
+addi.w   $r5, $r0,1024        //r5 = 1024
+addi.w   $r7, $r7, -1
+blt      $r7, $r0, FINISH   // 如果r7 < 0, 说明2^N组排完
+
+addi.w   $r8, $r4, 0
+LFSR:
+st.w     $r1, $r8, 0
+addi.w   $r8, $r8, 4
+srai.w   $r1, $r1, 1
+bge      $r1, $r0, NEXT_NUM     //说明第32位为0，不需要改变
+xor      $r1, $r1, $r3
+NEXT_NUM:
+addi.w   $r5, $r5, -1
+bne      $r5, $r0, LFSR   //如果r5为0，说明生成1024个数
+
+//读存储的数据
+addi.w   $r8, $r4, 0  //r8 = 1c008000
+CYCLE:
+ld.w     $r9, $r8, 0   //r9 = data
+st.w     $r9, $r2, 0x50   //存数据
+ld.w     $r10, $r2, 0x80    //读button
+addi.w   $r10, $r10, -1      // r10 -1
+blt      $r10, $r0,  LOAD        // r10 = 0,不变
+beq      $r10, $r0,  SUB    //r10 = 1，则-4
+addi.w   $r8,  $r8,  4
+b LOAD
+SUB:
+addi.w   $r8,  $r8,  -4
+LOAD:
+ld.w     $r10, $r2, 0x60   //读sw，r10 = sw
+andi.w   $r10, $r10, 0x40
+beq      $r10, $r0,  CYCLE   //不为0则排序
+
+//下面为排序程序
+addi.w   $r8, $r4, 0
+ld.w     $r10, $r8, 0  //r10 = min
+addi.w   $r15, $r10, 0  //r15 = 低地址值
+ld.w     $r11, $r8, 4092  //r11 = max
+addi.w   $r16, $r11, 0  //r16 = 高地址值
+addi.w   $r12, $r4, 0   //低位地址
+addi.w   $r13, $r4, 4092 //高位地址
+
+NEXT:
+addi.w   $r8,  $r12, 0
+addi.w   $r17, $r12, 0   //低位地址
+addi.w   $r18, $r3, 0   //低位地址
+BEGIN:
+ld.w     $r14, $r8, 0  
+// addi.w   $r8,  $r8, 4
+bgeu     $r14, $r10, MAX //  r14 >= r10
+addi.w   $r10, $r14, 0    //r10 = min
+addi.w   $r17, $r8, 0    //r17记录最小索引
+b       PART
+MAX:
+bgeu     $r11, $r14, PART     //r11 >= r14
+addi.w   $r11, $r14, 0   //比最大的大
+addi.w   $r18, $r8, 0  //r18记录最大索引
+
+PART:
+addi.w   $r8,  $r8, 4
+bltu     $r8,  $r13, BEGIN 
+//r8 = r13 表示完成一次
+st.w     $r10, $r12, 0
+st.w     $r11, $r13, 0
+st.w     $r15, $r17, 0
+st.w     $r16, $r18, 0
+addi.w   $r12, $r12, 4  
+addi.w   $r13, $r13, -4  
+bltu     $r12, $r13, NEXT    //未排完
+
+//读排完序后的数字
+FINISH:
+addi.w   $r8, $r4, 0
+F_CYCLE:
+ld.w     $r9, $r8, 0
+st.w     $r9, $r2, 0x50    //存数据
+ld.w     $r10, $r2, 0x80    //读button
+addi.w   $r10, $r10, -1      // r10 -1
+blt      $r10, $r0,  F_LOAD        // r10 = 0,不变
+beq      $r10, $r0,  F_SUB    //r10 = 1，则-4
+addi.w   $r8,  $r8,  4
+b F_LOAD
+F_SUB:
+addi.w   $r8,  $r8,  -4
+f_LOAD:
+ld.w     $r10, $r2, 0x60   //读sw，r10 = sw
+andi.w   $r10, $r10, 0x40
+beq      $r10, $r0,  ADDR  //不为0则排序
+
+
+
+

@@ -1,0 +1,228 @@
+lu12i.w $r2, 0xbfaff      
+lu12i.w $r1, 0x12345
+addi.w  $r1, $r1, 0x678    
+lu12i.w $r3, 0x60000
+addi.w  $r3, $r3, 0x200    
+lu12i.w $r4, 0x1c008        
+addi.w  $r31, $r0, 2046
+add.w   $r31, $r31, $r31
+READ:
+ld.w    $r6, $r2, 0x60     
+andi    $r7, $r6, 0x80     
+beq     $r7, $r0, READ     
+andi    $r6, $r6, 0xf     
+addi.w  $r7, $r0, 1         
+sll.w   $r7, $r7, $r6      
+
+ADDR:
+addi.w   $r5, $r0,1024        
+addi.w   $r7, $r7, -1
+blt      $r7, $r0, FINISH  
+
+addi.w   $r8, $r4, 0
+LFSR:
+st.w     $r1, $r8, 0
+addi.w   $r8, $r8, 4
+srai.w   $r1, $r1, 1
+bge      $r1, $r0, NEXT_NUM    
+xor      $r1, $r1, $r3
+NEXT_NUM:
+addi.w   $r5, $r5, -1
+bne      $r5, $r0, LFSR  
+
+addi.w   $r8, $r4, 0  
+CYCLE:
+ld.w     $r9, $r8, 0  
+st.w     $r9, $r2, 0x50  
+ld.w     $r10, $r2, 0x80   
+addi.w   $r10, $r10, -1
+blt      $r10, $r0,  LOAD      
+beq      $r10, $r0,  SUB    
+addi.w   $r8,  $r8,  4
+b LOAD
+SUB:
+addi.w   $r8,  $r8,  -4
+LOAD:
+ld.w     $r10, $r2, 0x60  
+andi     $r10, $r10, 0x40
+beq      $r10, $r0,  CYCLE   
+
+addi.w   $r8, $r4, 0
+ld.w     $r10, $r8, 0 
+addi.w   $r15, $r10, 0 
+add.w    $r13, $r4, $r31
+ld.w     $r11, $r31, 0  
+addi.w   $r16, $r11, 0 
+addi.w   $r12, $r4, 0 
+
+
+NEXT:
+addi.w   $r8,  $r12, 0
+addi.w   $r17, $r12, 0  
+addi.w   $r18, $r3, 0  
+BEGIN:
+ld.w     $r14, $r8, 0  
+
+bgeu     $r14, $r10, MAX 
+addi.w   $r10, $r14, 0   
+addi.w   $r17, $r8, 0    
+b       PART
+MAX:
+bgeu     $r11, $r14, PART   
+addi.w   $r11, $r14, 0  
+addi.w   $r18, $r8, 0  
+
+PART:
+addi.w   $r8,  $r8, 4
+bltu     $r8,  $r13, BEGIN 
+
+st.w     $r10, $r12, 0
+st.w     $r11, $r13, 0
+st.w     $r15, $r17, 0
+st.w     $r16, $r18, 0
+addi.w   $r12, $r12, 4  
+addi.w   $r13, $r13, -4  
+bltu     $r12, $r13, NEXT    
+
+
+FINISH:
+addi.w   $r8, $r4, 0
+F_CYCLE:
+ld.w     $r9, $r8, 0
+st.w     $r9, $r2, 0x50    
+ld.w     $r10, $r2, 0x80    
+addi.w   $r10, $r10, -1
+blt      $r10, $r0,  F_LOAD        
+beq      $r10, $r0,  F_SUB    
+addi.w   $r8,  $r8,  4
+b F_LOAD
+F_SUB:
+addi.w   $r8,  $r8,  -4
+f_LOAD:
+ld.w     $r10, $r2, 0x60   
+andi     $r10, $r10, 0x40
+beq      $r10, $r0,  ADDR  
+
+
+
+
+
+
+
+
+
+
+
+lu12i.w $r2, 0xbfaff      
+lu12i.w $r1, 0x12345
+addi.w  $r1, $r1, 0x678    
+lu12i.w $r3, 0xe0000
+addi.w  $r3, $r3, 0x200    
+lu12i.w $r4, 0x1c008        
+addi.w  $r31, $r0, 2046
+add.w   $r31, $r31, $r31
+READ:
+addi.w  $r6, $r0, 0x88
+st.w    $r6, $r2, 0x60
+ld.w    $r6, $r2, 0x60     
+andi    $r7, $r6, 0x80     
+beq     $r7, $r0, READ     
+andi    $r6, $r6, 0xf     
+addi.w  $r7, $r0, 1         
+sll.w   $r7, $r7, $r6      
+
+ADDR:
+addi.w   $r5, $r0,1024        
+addi.w   $r7, $r7, -1
+blt      $r7, $r0, FINISH  
+
+addi.w   $r8, $r4, 0
+LFSR:
+st.w     $r1, $r8, 0
+addi.w   $r8, $r8, 4
+andi      $r9, $r1, 1
+
+srai.w   $r1, $r1, 1
+beq      $r9, $r0, NEXT_NUM    
+xor      $r1, $r1, $r3
+NEXT_NUM:
+addi.w   $r5, $r5, -1
+bne      $r5, $r0, LFSR  
+
+addi.w   $r8, $r4, 0  
+CYCLE:
+ld.w     $r9, $r8, 0  
+st.w     $r9, $r2, 0x50  
+addi.w   $r10, $r0, 1   
+addi.w   $r10, $r10, -1
+blt      $r10, $r0,  LOAD      
+beq      $r10, $r0,  SUB    
+addi.w   $r8,  $r8,  4
+b LOAD
+SUB:
+addi.w   $r8,  $r8,  -4
+LOAD:
+ld.w     $r10, $r2, 0x60  
+addi.w   $r10, $r0, 0x40
+andi     $r10, $r10, 0x40
+beq      $r10, $r0,  CYCLE   
+
+addi.w   $r8, $r4, 0
+ld.w     $r10, $r8, 0 
+addi.w   $r15, $r10, 0 
+add.w    $r13, $r4, $r31
+ld.w     $r11, $r13, 0  
+addi.w   $r16, $r11, 0 
+addi.w   $r12, $r4, 0 
+
+
+NEXT:
+addi.w   $r8,  $r12, 0
+ld.w     $r10, $r8, 0
+addi.w   $r17, $r12, 0  
+addi.w   $r18, $r13, 0  
+ld.w     $r11, $r13, 0
+addi.w   $r15, $r10, 0
+addi.w   $r16, $r11, 0 
+BEGIN:
+ld.w     $r14, $r8, 0  
+
+bgeu     $r14, $r10, MAX 
+addi.w   $r10, $r14, 0   
+addi.w   $r17, $r8, 0    
+b       PART
+MAX:
+bgeu     $r11, $r14, PART   
+addi.w   $r11, $r14, 0  
+addi.w   $r18, $r8, 0  
+
+PART:
+addi.w   $r8,  $r8, 4
+bltu     $r8,  $r13, BEGIN 
+
+st.w     $r10, $r12, 0
+st.w     $r11, $r13, 0
+st.w     $r15, $r17, 0
+st.w     $r16, $r18, 0
+addi.w   $r12, $r12, 4  
+addi.w   $r13, $r13, -4  
+bltu     $r12, $r13, NEXT    
+
+
+FINISH:
+addi.w   $r8, $r4, 0
+F_CYCLE:
+ld.w     $r9, $r8, 0
+st.w     $r9, $r2, 0x50    
+ld.w     $r10, $r2, 0x80    
+addi.w   $r10, $r10, -1
+blt      $r10, $r0,  F_LOAD        
+beq      $r10, $r0,  F_SUB    
+addi.w   $r8,  $r8,  4
+b F_LOAD
+F_SUB:
+addi.w   $r8,  $r8,  -4
+f_LOAD:
+ld.w     $r10, $r2, 0x60   
+andi     $r10, $r10, 0x40
+beq      $r10, $r0,  ADDR  
